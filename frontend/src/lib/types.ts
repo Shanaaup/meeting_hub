@@ -112,3 +112,33 @@ export interface ChatMessage {
   content: string;
   citations?: Citation[];
 }
+
+/* ── Meeting DNA ── */
+
+export interface DNAAxes {
+  decisiveness: number;
+  engagement: number;
+  sentiment_balance: number;
+  action_clarity: number;
+  participation: number;
+  topic_focus: number;
+}
+
+export interface DNAInsight {
+  type: "positive" | "warning" | "info";
+  icon: string;
+  title: string;
+  detail: string;
+}
+
+export interface MeetingDNAResult {
+  axes: DNAAxes;
+  health_score: number;
+  grade: string;
+  insights: DNAInsight[];
+  speaker_word_distribution: Record<string, number>;
+  total_segments: number;
+  total_decisions: number;
+  total_actions: number;
+}
+
