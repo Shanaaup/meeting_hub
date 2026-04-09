@@ -21,6 +21,7 @@ import {
   User as UserIcon,
   Loader2,
   AlertTriangle,
+  Dna,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -33,6 +34,7 @@ import {
   Cell,
 } from "recharts";
 import AppLayout from "@/components/AppLayout";
+import MeetingDNAPanel from "@/components/MeetingDNA";
 import { meetingsApi, analysisApi, chatApi } from "@/lib/api";
 import type {
   MeetingDetail,
@@ -44,7 +46,7 @@ import type {
   Citation,
 } from "@/lib/types";
 
-type Tab = "insights" | "sentiment" | "chat";
+type Tab = "dna" | "insights" | "sentiment" | "chat";
 
 /* ── Sentiment Color Map ─────────── */
 const SENTIMENT_COLORS: Record<string, string> = {
@@ -467,7 +469,7 @@ export default function MeetingDetailPage() {
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [sentimentResult, setSentimentResult] = useState<SentimentResult | null>(null);
-  const [tab, setTab] = useState<Tab>("insights");
+  const [tab, setTab] = useState<Tab>("dna");
   const [loading, setLoading] = useState(true);
   const [extracting, setExtracting] = useState(false);
   const [analyzingSentiment, setAnalyzingSentiment] = useState(false);
@@ -593,6 +595,7 @@ export default function MeetingDetailPage() {
         {/* Tabs */}
         <div className="tab-nav inline-flex">
           {([
+            { key: "dna" as Tab, label: "Meeting DNA", icon: Dna },
             { key: "insights" as Tab, label: "Decisions & Actions", icon: ListChecks },
             { key: "sentiment" as Tab, label: "Sentiment", icon: TrendingUp },
             { key: "chat" as Tab, label: "AI Chat", icon: MessageSquare },
@@ -609,6 +612,9 @@ export default function MeetingDetailPage() {
 
         {/* Tab Content */}
         <div className="animate-fade-in" key={tab}>
+          {tab === "dna" && (
+            <MeetingDNAPanel meetingId={meetingId} />
+          )}
           {tab === "insights" && (
             <InsightsPanel
               decisions={decisions}

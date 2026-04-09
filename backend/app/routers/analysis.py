@@ -225,3 +225,49 @@ async def export_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{meeting.title}_report.pdf"'},
     )
+
+
+# ── Meeting DNA ──────────────────────────────────────────────────────────────
+from app.schemas.meeting_dna import MeetingDNAResult
+from app.services.nlp.meeting_dna import compute_meeting_dna
+import json as _json
+
+
+@router.get("/{meeting_id}/dna", response_model=MeetingDNAResult)
+async def get_meeting_dna(
+    meeting_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Compute the Meeting DNA fingerprint: 6-axis radar, health score, and insights."""
+    meeting = await _get_meeting(meeting_id, current_user.id, db)
+    if not meeting.raw_text:
+        raise HTTPException(status_code=400, detail="No transcript text found")
+
+    # Parse transcript segments
+    parsed = parse_transcript(meeting.raw_text, meeting.filename)
+    segments = parsed["segments"]
+
+    # Fetch decisions & action items from DB
+    decisions_res = await db.execute(select(Decision).where(Decision.meeting_id == meeting_id))
+    decisions = decisions_res.scalars().all()
+
+    actions_res = await db.execute(select(ActionItem).where(ActionItem.meeting_id == meeting_id))
+    action_items = actions_res.scalars().all()
+
+    # Parse speakers
+    try:
+        speakers = _json.loads(meeting.speakers)
+    except Exception:
+        speakers = []
+
+    # Compute DNA
+    dna = compute_meeting_dna(
+        segments=segments,
+        decisions=decisions,
+        action_items=action_items,
+        word_count=meeting.word_count,
+        speakers=speakers,
+    )
+
+    return MeetingDNAResult(**dna)

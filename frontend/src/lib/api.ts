@@ -77,6 +77,8 @@ export const analysisApi = {
     api.get(`/analysis/${meetingId}/export/csv`, { responseType: "blob" }),
   exportPdf: (meetingId: number) =>
     api.get(`/analysis/${meetingId}/export/pdf`, { responseType: "blob" }),
+  getDNA: (meetingId: number) =>
+    api.get(`/analysis/${meetingId}/dna`),
 };
 
 /* ── Chat ────────────────────────── */
